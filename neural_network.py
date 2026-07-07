@@ -74,7 +74,7 @@ print("Device:", device)
 
 model.to(device)
 
-checkpoint_path = "/session2/stack/model_checkpoint_epoch_40.pth"
+checkpoint_path = "model_checkpoint_epoch_40.pth"
 model.load_state_dict(torch.load(checkpoint_path, map_location=device))
 
 model.eval()
