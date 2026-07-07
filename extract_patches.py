@@ -125,8 +125,8 @@ model.classifier = nn.Sequential(
 # -------------------------
 # SAFE TRAIN/TEST SPLIT
 # -------------------------
-#num_samples = len(all_data)
-num_samples = 20
+num_samples = len(all_data)
+#num_samples = 20
 
 indices = np.arange(num_samples)
 np.random.shuffle(indices)
@@ -149,8 +149,8 @@ train_data = torch.utils.data.Subset(
 )
 
 
-train_dataloader = DataLoader(train_data, batch_size=4, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=4, shuffle=True) # change batch size
+train_dataloader = DataLoader(train_data, batch_size=16, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=16, shuffle=True) # change batch size
 
 
 # -------------------------
