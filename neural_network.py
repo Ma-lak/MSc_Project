@@ -5,7 +5,7 @@ from torchvision.models import MobileNetV2
 from torchvision.ops.misc import Conv2dNormActivation
 import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
-from matplotlib.animation import FFMpegWriter
+from matplotlib.animation import FFMpegWriter, PillowWriter
 import tifffile as tiff
 # include z dist between each frame if known
 
@@ -83,110 +83,111 @@ model.eval()
 # -------------------------
 # VIDEO SETUP
 # -------------------------
-# writer = FFMpegWriter(fps=15)
+#writer = FFMpegWriter(fps=15)
+writer = PillowWriter(fps=15)
 
-# fig = plt.figure(facecolor='0.9', figsize=(14, 14), dpi=100)
-# gs = fig.add_gridspec(nrows=9, ncols=9, left=0.05, right=0.85,
-#                       hspace=0.1, wspace=0.1)
+fig = plt.figure(facecolor='0.9', figsize=(14, 14), dpi=100)
+gs = fig.add_gridspec(nrows=9, ncols=9, left=0.05, right=0.85,
+                      hspace=0.1, wspace=0.1)
 
-# ax0 = fig.add_subplot(gs[0:8, 0:7])
-# ax1 = fig.add_subplot(gs[0:4, 7:])
-
-
-# # -------------------------
-# # PARAMETERS
-# # -------------------------
-# offset = 0
-# real_focus = []
-# dists = []
-
-# img_range = range(5, 55)
-
-# patch_size = 250
+ax0 = fig.add_subplot(gs[0:8, 0:7])
+ax1 = fig.add_subplot(gs[0:4, 7:])
 
 
-# # -------------------------
-# # MAIN LOOP
-# # -------------------------
-# with writer.saving(fig, "focus_video.mp4", 100):
+# -------------------------
+# PARAMETERS
+# -------------------------
+offset = 0
+real_focus = []
+dists = []
 
-#     for img in img_range:
-#         print("Frame:", img)
+img_range = range(5, 55)
 
-#         this_image = images[img]
+patch_size = 250
 
-#         # display image
-#         ax0.clear()
-#         ax0.imshow(this_image, interpolation='nearest',
-#                    vmin=0, vmax=50, cmap='gray')
-#         ax0.set_xticks([])
-#         ax0.set_yticks([])
 
-#         # REAL FOCUS (frame-relative, NOT microns)
-#         real_focus.append(img - images.shape[0] // 2)
+# -------------------------
+# MAIN LOOP
+# -------------------------
+with writer.saving(fig, "focus_video.gif", 100): #change gif to mp4
 
-#         # select patches
-#         selected_patches = select_patches(
-#             this_image, patch_size, 128, 25
-#         )
+    for img in img_range:
+        print("Frame:", img)
 
-#         all_patches = []
+        this_image = images[img]
 
-#         for (x, y) in selected_patches:
-#             patch = this_image[x:x+patch_size, y:y+patch_size].astype(np.float32)
+        # display image
+        ax0.clear()
+        ax0.imshow(this_image, interpolation='nearest',
+                   vmin=0, vmax=50, cmap='gray')
+        ax0.set_xticks([])
+        ax0.set_yticks([])
 
-#             # 2x2 binning
-#             patch = patch.reshape(
-#                 patch.shape[0] // 2, 2,
-#                 patch.shape[1] // 2, 2
-#             ).sum(axis=(1, 3))
+        # REAL FOCUS (frame-relative, NOT microns)
+        real_focus.append(img - images.shape[0] // 2)
 
-#             patch = process_image(patch, sat_prctile=95)
+        # select patches
+        selected_patches = select_patches(
+            this_image, patch_size, 128, 25
+        )
 
-#             all_patches.append(patch)
+        all_patches = []
 
-#         all_patches = np.array(all_patches)
+        for (x, y) in selected_patches:
+            patch = this_image[x:x+patch_size, y:y+patch_size].astype(np.float32)
 
-#         all_patches = transforms.ToImage()(all_patches)
-#         all_patches = all_patches.permute(1, 2, 0).unsqueeze(1)
-#         all_patches = all_patches.to(device)
+            # 2x2 binning
+            patch = patch.reshape(
+                patch.shape[0] // 2, 2,
+                patch.shape[1] // 2, 2
+            ).sum(axis=(1, 3))
 
-#         # -------------------------
-#         # MODEL INFERENCE
-#         # -------------------------
-#         with torch.no_grad():
-#             pred = model(all_patches).cpu().numpy()
+            patch = process_image(patch, sat_prctile=95)
 
-#         mean_distance = np.mean(pred[:, 0] * 40)
+            all_patches.append(patch)
 
-#         mean_class = np.mean(np.argmax(pred[:, 1:], axis=1))
+        all_patches = np.array(all_patches)
 
-#         if mean_class < 0.5:
-#             mean_distance *= -1
+        all_patches = transforms.ToImage()(all_patches)
+        all_patches = all_patches.permute(1, 2, 0).unsqueeze(1)
+        all_patches = all_patches.to(device)
 
-#         dists.append(mean_distance)
+        # -------------------------
+        # MODEL INFERENCE
+        # -------------------------
+        with torch.no_grad():
+            pred = model(all_patches).cpu().numpy()
 
-#         # -------------------------
-#         # PLOT RESULTS
-#         # -------------------------
-#         ax1.clear()
-#         ax1.plot(real_focus, label='Real (frame index)', color='k', linewidth=3)
-#         ax1.plot(dists, label='Predicted', color='b', linewidth=2)
+        mean_distance = np.mean(pred[:, 0] * 40)
 
-#         ax1.axhline(y=real_focus[-1], color='r', linestyle='--')
-#         ax1.axhline(y=0, color='k', linestyle='--')
+        mean_class = np.mean(np.argmax(pred[:, 1:], axis=1))
 
-#         ax1.set_xlim(0, len(list(img_range)))
-#         ax1.set_ylim(-15, 15)
+        if mean_class < 0.5:
+            mean_distance *= -1
 
-#         ax1.set_xlabel('Frame Index', fontsize=16)
-#         ax1.set_ylabel('Focus (relative)', fontsize=16)
-#         ax1.legend(fontsize=14, loc='lower right')
+        dists.append(mean_distance)
 
-#         ax1.tick_params(axis='both', which='major', labelsize=14)
+        # -------------------------
+        # PLOT RESULTS
+        # -------------------------
+        ax1.clear()
+        ax1.plot(real_focus, label='Real (frame index)', color='k', linewidth=3)
+        ax1.plot(dists, label='Predicted', color='b', linewidth=2)
 
-#         writer.grab_frame()
+        ax1.axhline(y=real_focus[-1], color='r', linestyle='--')
+        ax1.axhline(y=0, color='k', linestyle='--')
 
-# writer.finish()
+        ax1.set_xlim(0, len(list(img_range)))
+        ax1.set_ylim(-15, 15)
+
+        ax1.set_xlabel('Frame Index', fontsize=16)
+        ax1.set_ylabel('Focus (relative)', fontsize=16)
+        ax1.legend(fontsize=14, loc='lower right')
+
+        ax1.tick_params(axis='both', which='major', labelsize=14)
+
+        writer.grab_frame()
+
+writer.finish()
 
 print("Done: focus_video.mp4 saved")
