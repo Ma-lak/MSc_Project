@@ -242,7 +242,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 5
+epochs = 50
 
 for epoch in range(epochs):
     print(f"\nEpoch {epoch}")
