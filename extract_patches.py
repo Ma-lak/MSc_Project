@@ -69,6 +69,7 @@ tr = transforms.Compose([
     transforms.ToImage(),
     transforms.ToDtype(torch.float32, scale=True),
 ])
+# Need to add resize and rotations
 
 
 # -------------------------
@@ -165,8 +166,8 @@ print("Device:", device)
 model.to(device)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
-#scheduler = MultiStepLR(optimizer,milestones=[50, 100, 150], gamma=0.5) # add milestones
+#scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
+scheduler = MultiStepLR(optimizer,milestones=[50, 100, 150], gamma=0.5) # add milestones
 
 
 # -------------------------
@@ -232,7 +233,7 @@ def test(dataloader, model):
 
             all_sign_labels.append(y_class.cpu().numpy())
             all_sign_preds.append(torch.argmax(pred[:, 1:], dim=1).cpu().numpy())
-
+# missing batch code if batch == 0; else
     return (
         reg_loss_total / len(dataloader),
         class_loss_total / len(dataloader)
@@ -242,7 +243,26 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 50
+epochs = 300
+train_reg_losses = []
+train_class_losses = []
+test_reg_losses = []
+test_class_losses = []
+
+# # load checkpoint if it exists:
+# # find potential checkpoint files:
+# checkpoint_files = [f for f in os.listdir('.') if f.startswith('model_checkpoint_epoch_') and f.endswith('.pth')]
+# last_epoch = 0
+# if checkpoint_files:
+#     # sort by epoch number and take the last one:
+#     checkpoint_files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
+#     checkpoint_path = checkpoint_files[-1]
+#     print(f'Loading checkpoint from {checkpoint_path}')
+#     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+#     # also update the scheduler to start from the last epoch:
+#     last_epoch = int(checkpoint_path.split('_')[-1].split('.')[0])
+#     scheduler.last_epoch = last_epoch
+
 
 for epoch in range(epochs):
     print(f"\nEpoch {epoch}")
@@ -250,6 +270,10 @@ for epoch in range(epochs):
     train_reg, train_class = train(train_dataloader, model)
     test_reg, test_class = test(test_dataloader, model)
 
+    train_reg_losses.append(train_reg)
+    train_class_losses.append(train_class)
+    test_reg_losses.append(test_reg)
+    test_class_losses.append(test_class)
     scheduler.step()
 
     print(f"Train reg: {train_reg:.4f}, class: {train_class:.4f}")
@@ -259,4 +283,30 @@ for epoch in range(epochs):
         torch.save(model.state_dict(), f"model_checkpoint_epoch_{epoch}.pth")
 
 
+    # plt.draw()
+    # plt.pause(0.001)
+    # axs[1].cla()
+    # axs[1].plot(train_reg_losses)
+    # axs[1].plot(test_reg_losses)
+    # plt.draw()
+    # plt.pause(0.001)
+    # axs[2].cla()
+    # axs[2].plot(train_class_losses)
+    # axs[2].plot(test_class_losses)
+    # plt.draw()
+    # plt.pause(0.001)
+plt.figure(figsize=(10, 6))
+
+plt.plot(train_reg_losses, label='Train Regression')
+plt.plot(test_reg_losses, label='Test Regression')
+plt.plot(train_class_losses, label='Train Classification')
+plt.plot(test_class_losses, label='Test Classification')
+
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Training and Test Loss")
+plt.legend()
+plt.grid(True)
+
+plt.show()
 print("DONE")
