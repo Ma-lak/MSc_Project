@@ -4,17 +4,17 @@ from PIL import Image
 from scipy.signal import medfilt2d
 import tifffile as tiff
 
-# ----------------------------
+
 # OUTPUT FOLDER
-# ----------------------------
+
 subdir = "session2/stack"
 os.makedirs(subdir, exist_ok=True)
 
 np.random.seed(0)
 
-# ----------------------------
+
 # IMAGE PROCESSING
-# ----------------------------
+
 def process_image(image, sat_prctile=99):
     sat = np.percentile(image, sat_prctile)
     image = sat * np.tanh(image / (sat + 1e-8))
@@ -22,9 +22,9 @@ def process_image(image, sat_prctile=99):
     return image
 
 
-# ----------------------------
+
 # PATCH SELECTION
-# ----------------------------
+
 def select_patches(image, patch_size, num_patches, threshold):
 
     patches = []
@@ -48,9 +48,9 @@ def select_patches(image, patch_size, num_patches, threshold):
     return patches
 
 
-# ----------------------------
+
 # FOCUS ESTIMATION
-# ----------------------------
+
 def find_focus_dists(image_stack, distance_between_images=1.0, debug=False):
 
     uc = np.zeros(image_stack.shape[0])
@@ -87,9 +87,9 @@ def find_focus_dists(image_stack, distance_between_images=1.0, debug=False):
     return best_focus, focus_dists
 
 
-# ----------------------------
+
 # LOAD TIFF STACK
-# ----------------------------
+
 def load_tiff_stack(path):
 
     stack = tiff.imread(path)
@@ -99,9 +99,9 @@ def load_tiff_stack(path):
     return stack
 
 
-# ----------------------------
+
 # MAIN EXTRACTION PIPELINE
-# ----------------------------
+
 def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
 
     stack = load_tiff_stack(tiff_path)
@@ -138,12 +138,12 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
         )
 
         # Skip patches whose focus is too close to stack boundaries
-        if best_focus < 30 or best_focus > stack.shape[0] - 30:
+        if best_focus < 30 or best_focus > stack.shape[0] - 30: # maybe change this logic
             print("Skipping patch (focus near edge).")
             continue
 
         # Generate every distance from the same focus calculation
-        for dist in range(-50, 51): #change to -100 to 100
+        for dist in range(-100, 101): #change to -100 to 100 originally -13 to 13
 
             frame_idx = np.argmin(np.abs(focus_dists - dist))
 
@@ -173,9 +173,9 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
     return file_names, np.array(focal_distances)
 
 
-# ----------------------------
+
 # RUN SCRIPT
-# ----------------------------
+
 if __name__ == "__main__":
 
     tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
