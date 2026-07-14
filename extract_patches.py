@@ -1,3 +1,4 @@
+import time
 import torch
 from torch import nn
 from torchvision.models import MobileNetV2
@@ -243,7 +244,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 300
+epochs = 200
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -266,8 +267,10 @@ test_class_losses = []
 
 for epoch in range(epochs):
     print(f"\nEpoch {epoch}")
-
+    start_time = time.time()
     train_reg, train_class = train(train_dataloader, model)
+    end_time = time.time()
+    print(f"Training time: {end_time - start_time:.2f} seconds")
     test_reg, test_class = test(test_dataloader, model)
 
     train_reg_losses.append(train_reg)
@@ -307,6 +310,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
+plt.savefig("loss_plot.png") 
 
-plt.show()
+#plt.show()
 print("DONE")
