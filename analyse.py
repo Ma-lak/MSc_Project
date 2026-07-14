@@ -3,7 +3,7 @@ import os
 from PIL import Image
 from scipy.signal import medfilt2d
 import tifffile as tiff
-
+import matplotlib.pyplot as plt
 
 # OUTPUT FOLDER
 
@@ -68,7 +68,7 @@ def find_focus_dists(image_stack, distance_between_images=1.0, debug=False):
     best_focus = np.argmax(uc)
 
     if debug:
-        import matplotlib.pyplot as plt
+
 
         fig, axs = plt.subplots(1, 2, figsize=(10, 4))
 
@@ -125,6 +125,24 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
 
     print(f"{len(selected_patches)} patches selected.")
 
+    plt.figure(figsize=(8,8))
+    plt.imshow(middle_image,cmap='gray')
+
+    for x,y in selected_patches:
+
+        plt.gca().add_patch(
+            plt.Rectangle(
+            (y,x),
+            70, # originally 96 x 96
+            70,
+            edgecolor='red',
+            fill=False,
+            linewidth=0.5
+            )
+        )
+
+    plt.savefig("selected_patches.png")
+
     for patch_idx, (x, y) in enumerate(selected_patches):
 
         print(f"Processing patch {patch_idx + 1}/{len(selected_patches)}")
@@ -180,9 +198,9 @@ if __name__ == "__main__":
 
     tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
 
-    patch_size = 250
+    patch_size = 70 # originally 250
     threshold = 25
-    num_patches = 20
+    num_patches = 128 # originally 20 but too small
 
     file_names, distances = extract_patches_from_tiff(
         tiff_path,

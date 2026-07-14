@@ -244,7 +244,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 200
+epochs = 50
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -264,13 +264,10 @@ test_class_losses = []
 #     last_epoch = int(checkpoint_path.split('_')[-1].split('.')[0])
 #     scheduler.last_epoch = last_epoch
 
-
+start_time = time.time()
 for epoch in range(epochs):
     print(f"\nEpoch {epoch}")
-    start_time = time.time()
     train_reg, train_class = train(train_dataloader, model)
-    end_time = time.time()
-    print(f"Training time: {end_time - start_time:.2f} seconds")
     test_reg, test_class = test(test_dataloader, model)
 
     train_reg_losses.append(train_reg)
@@ -298,6 +295,14 @@ for epoch in range(epochs):
     # axs[2].plot(test_class_losses)
     # plt.draw()
     # plt.pause(0.001)
+end_time = time.time()
+training_time = end_time - start_time
+f = training_time / 3600
+k = training_time % 3600
+t = k * 60
+j = t % 60
+s = j * 60
+print(f"Training time: {f:.0f} hours, {k:.0f} minutes, {s:.0f} seconds or {training_time:.2f} seconds")
 plt.figure(figsize=(10, 6))
 
 plt.plot(train_reg_losses, label='Train Regression')
