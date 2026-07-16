@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot_20_epochs_rotation.png") 
+plt.savefig("loss_plot_20_epochs.png") 
 
 #plt.show()
 print("DONE")
