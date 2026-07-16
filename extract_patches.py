@@ -68,9 +68,9 @@ class FocusDataset(Dataset):
 # -------------------------
 tr = transforms.Compose([
     transforms.ToImage(),
-    transforms.ToDtype(torch.float32, scale=True),
+    transforms.ToDtype(torch.float32, scale=True)
     #transforms.Resize((1000, 1000)),
-    transforms.RandomRotation(90) #test
+    #transforms.RandomRotation(90) #test
 ])
 # Need to add resize and rotations
 
