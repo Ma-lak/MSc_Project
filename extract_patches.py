@@ -167,8 +167,8 @@ print("Device:", device)
 model.to(device)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-#scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
-scheduler = MultiStepLR(optimizer,milestones=[50, 100, 150], gamma=0.5) # add milestones
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
+#scheduler = MultiStepLR(optimizer,milestones=[50, 100, 150], gamma=0.5) # add milestones
 
 
 # -------------------------
@@ -244,7 +244,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 50
+epochs = 100
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -315,7 +315,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot.png") 
+plt.savefig("loss_plot_100_epochs.png") 
 
 #plt.show()
 print("DONE")
