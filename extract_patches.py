@@ -68,9 +68,9 @@ class FocusDataset(Dataset):
 # -------------------------
 tr = transforms.Compose([
     transforms.ToImage(),
-    transforms.ToDtype(torch.float32, scale=True)
+    transforms.ToDtype(torch.float32, scale=True),
     #transforms.Resize((1000, 1000)),
-    #transforms.RandomRotation(90) #test
+    transforms.RandomRotation(90)
 ])
 # Need to add resize and rotations
 
@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot_20_epochs.png") 
+plt.savefig("loss_plot_20_epochs_combined_rotations.png") 
 
 #plt.show()
 print("DONE")
