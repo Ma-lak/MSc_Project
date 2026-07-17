@@ -79,8 +79,10 @@ tr = transforms.Compose([
 # LOAD DATA
 # -------------------------
 all_data = FocusDataset(
-    'session2/stack/file_names_and_distances.csv',
-    'session2/stack',
+    'combined_data/file_names_and_distances.csv',    
+    #  'session2/stack/file_names_and_distances.csv', if using just one tiff file
+    # 'session2/stack',
+    'combined_data',
     transform=tr
 )
 
@@ -299,12 +301,10 @@ for epoch in range(epochs):
     # plt.pause(0.001)
 end_time = time.time()
 training_time = end_time - start_time
-f = training_time / 3600
-k = training_time % 3600
-t = k * 60
-j = t % 60
-s = j * 60
-print(f"Training time: {f:.0f} hours, {k:.0f} minutes, {s:.0f} seconds or {training_time:.2f} seconds")
+h = training_time / 3600
+m = training_time / 60
+s = m % 60
+print(f"Training time: {h:.0f} hours, {m:.0f} minutes, {s:.0f} seconds or {training_time:.2f} seconds")
 plt.figure(figsize=(10, 6))
 
 plt.plot(train_reg_losses, label='Train Regression')
