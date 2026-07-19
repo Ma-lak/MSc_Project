@@ -182,7 +182,7 @@ plt.show()
 # -------------------------
 # 100 RANDOM TRAIN/TEST SPLITS
 # -------------------------
-num_splits = 2
+num_splits = 100
 epochs = 20
 
 all_train_reg = []
@@ -255,7 +255,7 @@ for split_num in range(num_splits):
     test_reg_losses = []
 
     for epoch in range(epochs):
-
+        print(f"Epoch {epoch+1}/{epochs}")
         train_reg, train_class = train(train_dataloader, model)
         test_reg, test_class = test(test_dataloader, model)
 
