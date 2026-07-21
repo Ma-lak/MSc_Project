@@ -200,7 +200,7 @@ if __name__ == "__main__":
     # tiff_path = "session3/zStack/uclaminiscopev4-stack_0.tif"
     patch_size = 70 # originally 250
     threshold = 25
-    num_patches = 40 # originally 20 but too small
+    num_patches = 128 # originally 40 but too small
 
     file_names, distances = extract_patches_from_tiff(
         tiff_path,

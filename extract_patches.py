@@ -284,7 +284,7 @@ for epoch in range(epochs):
     print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), f"model_s2_100epochs_checkpoint_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"model_s2__128_patches_100epochs_checkpoint_epoch_{epoch}.pth")
 
 
     # plt.draw()
@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot_100_epochs_s2_fixed.png") 
+plt.savefig("loss_plot_128patches_100_epochs_s2_fixed.png") 
 
 #plt.show()
 print("DONE")
