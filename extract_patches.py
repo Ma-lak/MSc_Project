@@ -68,9 +68,9 @@ class FocusDataset(Dataset):
 # -------------------------
 tr = transforms.Compose([
     transforms.ToImage(),
-    transforms.ToDtype(torch.float32, scale=True),
+    transforms.ToDtype(torch.float32, scale=True)
     #transforms.Resize((1000, 1000)),
-    transforms.RandomRotation(90)
+    # transforms.RandomRotation(90)
 ])
 # Need to add resize and rotations
 
@@ -100,8 +100,8 @@ for i, idx in enumerate(indices):
     img = all_data[idx][0][0].numpy()
     axs[i//5, i%5].imshow(img, cmap='gray')
 
-plt.show()
-
+#plt.show()
+plt.savefig("dataset_visualization.png", dpi=300)
 
 # -------------------------
 # MODEL
@@ -248,7 +248,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 20 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
+epochs = 21 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -270,7 +270,7 @@ test_class_losses = []
 
 start_time = time.time()
 for epoch in range(epochs):
-    print(f"\nEpoch {epoch}")
+    print(f"\nEpoch {epoch+1}")
     train_reg, train_class = train(train_dataloader, model)
     test_reg, test_class = test(test_dataloader, model)
 
