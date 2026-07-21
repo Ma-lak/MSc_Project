@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # OUTPUT FOLDER
 
-subdir = "data"
+subdir = "/"
 subdir_session2 = "session2/stack"
 os.makedirs(subdir_session2, exist_ok=True)
 
