@@ -79,10 +79,10 @@ tr = transforms.Compose([
 # LOAD DATA
 # -------------------------
 all_data = FocusDataset(
-    'combined_data/file_names_and_distances.csv',    
+    'output/file_names_and_distances_combined.csv',    
     #  'session2/stack/file_names_and_distances.csv', if using just one tiff file
     # 'session2/stack',
-    'combined_data',
+    'output',
     transform=tr
 )
 
@@ -101,7 +101,7 @@ for i, idx in enumerate(indices):
     axs[i//5, i%5].imshow(img, cmap='gray')
 
 #plt.show()
-plt.savefig("dataset_visualization.png", dpi=300)
+plt.savefig("dataset_visualization_combined.png", dpi=300)
 
 # -------------------------
 # MODEL
@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot_20_epochs_combined_rotations.png") 
+plt.savefig("loss_plot_20_epochs_combined_fixed.png") 
 
 #plt.show()
 print("DONE")
