@@ -248,7 +248,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 101 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
+epochs = 201 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
