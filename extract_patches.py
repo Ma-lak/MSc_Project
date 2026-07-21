@@ -248,7 +248,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 201 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
+epochs = 101 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -284,7 +284,7 @@ for epoch in range(epochs):
     print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), f"model2_200epochs_checkpoint_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"model1_100epochs_checkpoint_epoch_{epoch}.pth")
 
 
     # plt.draw()
