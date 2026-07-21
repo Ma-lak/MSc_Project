@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # OUTPUT FOLDER
 
-subdir = "/"
+subdir = "data"
 subdir_session2 = "session2/stack"
 os.makedirs(subdir_session2, exist_ok=True)
 
@@ -233,8 +233,8 @@ if __name__ == "__main__":
 # tiff_path_s3 = "session3/zStack/uclaminiscopev4-stack_0.tif"
     # TWO TIFF FILES
     tiff_paths = [
-        "session2/stack/uclaminiscopev4-stack_1_40fps.tif",
-        "session3/zStack/uclaminiscopev4-stack_0.tif"
+        "/uclaminiscopev4-stack_1_40fps.tif",
+        "/uclaminiscopev4-stack_0.tif"
     ]
 
     patch_size = 70
