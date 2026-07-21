@@ -171,7 +171,8 @@ print("Device:", device)
 model.to(device)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, gamma=0.5)  
+# scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
 #scheduler = MultiStepLR(optimizer,milestones=[50, 100, 150], gamma=0.5) # add milestones
 
 
@@ -248,7 +249,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 101 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
+epochs = 21 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
