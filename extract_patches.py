@@ -100,8 +100,8 @@ for i, idx in enumerate(indices):
     img = all_data[idx][0][0].numpy()
     axs[i//5, i%5].imshow(img, cmap='gray')
 
-#plt.show()
-plt.savefig("dataset_visualization_combined.png", dpi=300)
+plt.show()
+#plt.savefig("dataset_visualization_combined.png", dpi=300)
 
 # -------------------------
 # MODEL
@@ -248,7 +248,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 41 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
+epochs = 101 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -284,7 +284,7 @@ for epoch in range(epochs):
     print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), f"model2_checkpoint_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"model2_100epochs_checkpoint_epoch_{epoch}.pth")
 
 
     # plt.draw()
@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot_20_epochs_combined_fixed.png") 
+plt.savefig("loss_plot_100_epochs_combined_fixed.png") 
 
 #plt.show()
 print("DONE")
