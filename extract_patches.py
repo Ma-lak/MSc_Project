@@ -79,10 +79,10 @@ tr = transforms.Compose([
 # LOAD DATA
 # -------------------------
 all_data = FocusDataset(
-    'output/file_names_and_distances_combined.csv',    
-    #  'session2/stack/file_names_and_distances.csv', if using just one tiff file
-    # 'session2/stack',
-    'output',
+    #'output/file_names_and_distances_combined.csv',    
+       'session2/stack/file_names_and_distances.csv', #if using just one tiff file
+     'session2/stack',
+    #'output',
     transform=tr
 )
 
