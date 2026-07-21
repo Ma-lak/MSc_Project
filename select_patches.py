@@ -197,30 +197,30 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
 
 # RUN SCRIPT
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
+#     tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
 
-    patch_size = 70 # originally 250
-    threshold = 25
-    num_patches = 40 # originally 20 but too small
+#     patch_size = 70 # originally 250
+#     threshold = 25
+#     num_patches = 40 # originally 20 but too small
 
-    file_names, distances = extract_patches_from_tiff(
-        tiff_path,
-        patch_size,
-        num_patches,
-        threshold
-    )
+#     file_names, distances = extract_patches_from_tiff(
+#         tiff_path,
+#         patch_size,
+#         num_patches,
+#         threshold
+#     )
 
-    csv_path = os.path.join(subdir, "file_names_and_distances.csv")
+#     csv_path = os.path.join(subdir, "file_names_and_distances.csv")
 
-    with open(csv_path, "w") as f:
-        f.write("file_name,distance\n")
-        for name, dist in zip(file_names, distances):
-            f.write(f"{name},{dist}\n")
+#     with open(csv_path, "w") as f:
+#         f.write("file_name,distance\n")
+#         for name, dist in zip(file_names, distances):
+#             f.write(f"{name},{dist}\n")
 
-    print(f"\nFinished! Generated {len(file_names)} images.")
-    print("CSV saved to:", csv_path)
+#     print(f"\nFinished! Generated {len(file_names)} images.")
+#     print("CSV saved to:", csv_path)
 
 
 
