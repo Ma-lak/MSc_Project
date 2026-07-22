@@ -170,7 +170,7 @@ print("Device:", device)
 
 model.to(device)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=0)# add weight decay = 0
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)# add weight decay = 0
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
 scheduler = MultiStepLR(optimizer,milestones=[10, 100, 150], gamma=0.5) # add milestones
 
