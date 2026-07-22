@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # OUTPUT FOLDER
 
-subdir = "session2/stack_70_128"
+subdir = "session2/stack_200_128"
 os.makedirs(subdir, exist_ok=True)
 
 np.random.seed(0)
