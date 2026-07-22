@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # OUTPUT FOLDER
 
-subdir = "session2/stack_200_128"
+subdir = "session2/stack_36_128"
 os.makedirs(subdir, exist_ok=True)
 
 np.random.seed(0)
@@ -133,8 +133,8 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
         plt.gca().add_patch(
             plt.Rectangle(
             (y,x),
-            200, # originally 96 x 96
-            200,
+            36, # originally 96 x 96
+            36,
             edgecolor='red',
             fill=False,
             linewidth=0.5
@@ -196,9 +196,9 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
 
 if __name__ == "__main__":
 
-    tiff_path = "session2/stack_200_128/uclaminiscopev4-stack_1_40fps.tif"
+    tiff_path = "session2/stack_36_128/uclaminiscopev4-stack_1_40fps.tif"
     # tiff_path = "session3/zStack/uclaminiscopev4-stack_0.tif"
-    patch_size = 200 # originally 250,70 try 40 next
+    patch_size = 36 # originally 250,70 try 40 next
     threshold = 25
     num_patches = 128 # originally 40 but too small
 

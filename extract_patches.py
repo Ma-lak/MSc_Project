@@ -80,8 +80,8 @@ tr = transforms.Compose([
 # -------------------------
 all_data = FocusDataset(
     #'output/file_names_and_distances_combined.csv',    
-       'session2/stack_200_128/file_names_and_distances.csv', #if using just one tiff file
-     'session2/stack_200_128',
+       'session2/stack_36_128/file_names_and_distances.csv', #if using just one tiff file
+     'session2/stack_36_128',
     #'output',
     transform=tr
 )
@@ -284,7 +284,7 @@ for epoch in range(epochs):
     print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), f"model_s2_size200__128_patches_50epochs_checkpoint_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"model_s2_size36__128_patches_50epochs_checkpoint_epoch_{epoch}.pth")
 
 
     # plt.draw()
@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot__size200_128patches_batch40_50_epochs_s2.png") 
+plt.savefig("loss_plot__size36_128patches_batch40_50_epochs_s2.png") 
 
 #plt.show()
 print("DONE")
