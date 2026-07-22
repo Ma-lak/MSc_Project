@@ -16,8 +16,8 @@ np.random.seed(0)
 # IMAGE PROCESSING
 
 def process_image(image, sat_prctile=99):
-    # sat = np.percentile(image, sat_prctile)
-    # image = sat * np.tanh(image / (sat + 1e-8))
+    sat = np.percentile(image, sat_prctile)
+    image = sat * np.tanh(image / (sat + 1e-8))
     image = image / np.sqrt(np.sum(image ** 2) + 1e-8)
     return image
 
