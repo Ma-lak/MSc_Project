@@ -16,8 +16,8 @@ np.random.seed(0)
 # IMAGE PROCESSING
 
 def process_image(image, sat_prctile=99):
-    sat = np.percentile(image, sat_prctile)
-    image = sat * np.tanh(image / (sat + 1e-8))
+    # sat = np.percentile(image, sat_prctile)
+    # image = sat * np.tanh(image / (sat + 1e-8))
     image = image / np.sqrt(np.sum(image ** 2) + 1e-8)
     return image
 
@@ -59,7 +59,7 @@ def find_focus_dists(image_stack, distance_between_images=1.0, debug=False):
 
         image = process_image(image.astype(np.float32), sat_prctile=99)
 
-        # Faster than full FFT because signal is real-valued
+        # ???
         flt = np.mean(image, axis=0)
         spectrum = np.abs(np.fft.rfft(flt)) ** 2
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
     # tiff_path = "session3/zStack/uclaminiscopev4-stack_0.tif"
-    patch_size = 70 # originally 250
+    patch_size = 70 # originally 250,70 try 40 next
     threshold = 25
     num_patches = 128 # originally 40 but too small
 
