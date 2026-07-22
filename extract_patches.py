@@ -155,8 +155,8 @@ train_data = torch.utils.data.Subset(
 )
 
 
-train_dataloader = DataLoader(train_data, batch_size=40, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=40, shuffle=True) # initial batch size 16
+train_dataloader = DataLoader(train_data, batch_size=16, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=16, shuffle=True) # initial batch size 16
 
 
 # -------------------------
@@ -170,9 +170,9 @@ print("Device:", device)
 
 model.to(device)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)# add weight decay = 0
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=0)# add weight decay = 0
 # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
-scheduler = MultiStepLR(optimizer,milestones=[20], gamma=0.5) # add milestones
+scheduler = MultiStepLR(optimizer,milestones=[10, 100, 150], gamma=0.5) # add milestones
 
 
 # -------------------------
