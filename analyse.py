@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # OUTPUT FOLDER
 
-subdir = "session2/stack"
+subdir = "session2/stack_70_128"
 os.makedirs(subdir, exist_ok=True)
 
 np.random.seed(0)
@@ -196,7 +196,7 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
 
 if __name__ == "__main__":
 
-    tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
+    tiff_path = "session2/stack_70_128/uclaminiscopev4-stack_1_40fps.tif"
     # tiff_path = "session3/zStack/uclaminiscopev4-stack_0.tif"
     patch_size = 70 # originally 250,70 try 40 next
     threshold = 25
