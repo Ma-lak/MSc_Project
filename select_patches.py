@@ -237,9 +237,9 @@ if __name__ == "__main__":
         "data/uclaminiscopev4-stack_0.tif"
     ]
 
-    patch_size = 70
+    patch_size = 224
     threshold = 25
-    num_patches = 40
+    num_patches = 128
 
     # Store results from BOTH TIFF files
     all_file_names = []

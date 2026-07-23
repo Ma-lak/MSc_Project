@@ -79,12 +79,12 @@ tr = transforms.Compose([
 # LOAD DATA
 # -------------------------
 all_data = FocusDataset(
-    #'output/file_names_and_distances_combined.csv',    
+    'output/file_names_and_distances_combined.csv',    
     #    'session2/stack_224_128/file_names_and_distances.csv', #if using just one tiff file
     #  'session2/stack_224_128',
-    #'output',
-    'session3/zStack_224_128/file_names_and_distances.csv',
-    'session3/zStack_224_128',
+    'output',
+    # 'session3/zStack_224_128/file_names_and_distances.csv',
+    # 'session3/zStack_224_128',
     transform=tr
 )
 
@@ -286,7 +286,7 @@ for epoch in range(epochs):
     print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), f"model_s3_size224__128_patches_220epochs_checkpoint_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"model_combined_size224__128_patches_220epochs_checkpoint_epoch_{epoch}.pth")
 
 
     # plt.draw()
@@ -319,7 +319,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot__size224_128patches_220_epochs_s3.png") 
+plt.savefig("loss_plot__size224_128patches_220_epochs_combined.png") 
 
 #plt.show()
 print("DONE")
