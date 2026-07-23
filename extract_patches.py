@@ -69,7 +69,7 @@ class FocusDataset(Dataset):
 tr = transforms.Compose([
     transforms.ToImage(),
     #transforms.ToDtype(torch.float32, scale=True)
-    # transforms.Resize((224, 224)),
+    #transforms.Resize((224, 224)),
     # transforms.RandomRotation(90)
 ])
 # Need to add resize and rotations
@@ -248,7 +248,7 @@ def test(dataloader, model):
 # -------------------------
 # TRAIN LOOP
 # -------------------------
-epochs = 51 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
+epochs = 501 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 20 to be safe
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -284,7 +284,7 @@ for epoch in range(epochs):
     print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
 
     if epoch % 10 == 0:
-        torch.save(model.state_dict(), f"model_s2_size224__128_patches_50epochs_checkpoint_epoch_{epoch}.pth")
+        torch.save(model.state_dict(), f"model_s2_size224__128_patches_500epochs_checkpoint_epoch_{epoch}.pth")
 
 
     # plt.draw()
@@ -317,7 +317,7 @@ plt.ylabel("Loss")
 plt.title("Training and Test Loss")
 plt.legend()
 plt.grid(True)
-plt.savefig("loss_plot__size224_128patches_batch40_50_epochs_s2_resize.png") 
+plt.savefig("loss_plot__size224_128patches_500_epochs_s2.png") 
 
 #plt.show()
 print("DONE")
