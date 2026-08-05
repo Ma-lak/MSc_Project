@@ -136,8 +136,8 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold):
         plt.gca().add_patch(
             plt.Rectangle(
             (y,x),
-            70, # originally 96 x 96
-            70,
+            224, # originally 96 x 96
+            224,
             edgecolor='red',
             fill=False,
             linewidth=0.5
