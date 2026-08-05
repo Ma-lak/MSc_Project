@@ -288,19 +288,6 @@ for epoch in range(epochs):
     if epoch % 10 == 0:
         torch.save(model.state_dict(), f"model_combined_size224__128_patches_220epochs_checkpoint_epoch_{epoch}.pth")
 
-
-    # plt.draw()
-    # plt.pause(0.001)
-    # axs[1].cla()
-    # axs[1].plot(train_reg_losses)
-    # axs[1].plot(test_reg_losses)
-    # plt.draw()
-    # plt.pause(0.001)
-    # axs[2].cla()
-    # axs[2].plot(train_class_losses)
-    # axs[2].plot(test_class_losses)
-    # plt.draw()
-    # plt.pause(0.001)
 end_time = time.time()
 training_time = end_time - start_time
 h = training_time / 3600
