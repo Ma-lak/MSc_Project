@@ -9,13 +9,11 @@ from scipy.ndimage import zoom
 
 # OUTPUT FOLDER
 
-subdir = 'five_fish_patches' #"output"
-subdir_session2 = "session2/stack"
-os.makedirs(subdir_session2, exist_ok=True)
+subdir = 'test_patches'
 
-subdir_session3 = "session3/zStack"
-os.makedirs(subdir_session3, exist_ok=True)
-np.random.seed(0)
+os.makedirs(subdir, exist_ok=True)
+
+np.random.seed(0) #7, 42
 
 
 # IMAGE PROCESSING
@@ -41,7 +39,6 @@ def select_patches(image, patch_size, num_patches, threshold):
     y_max = image.shape[1] * 3 // 4
 
     while len(patches) < num_patches:
-        print("Inside while loop")
 
         x = np.random.randint(x_min, x_max - patch_size)
         y = np.random.randint(y_min, y_max - patch_size)
@@ -50,7 +47,6 @@ def select_patches(image, patch_size, num_patches, threshold):
         print(np.percentile(patch,99))
         if np.percentile(patch, 99) > threshold:
             patches.append((x, y))
-            print("Patch added", np.percentile(patch,99))
 
     return patches
 
@@ -58,7 +54,7 @@ def select_patches(image, patch_size, num_patches, threshold):
 
 # FOCUS ESTIMATION
 
-def find_focus_dists(image_stack, distance_between_images=1.0, debug=True):
+def find_focus_dists(image_stack, distance_between_images=1.0, debug=False):
 
     uc = np.zeros(image_stack.shape[0])
 
@@ -66,7 +62,7 @@ def find_focus_dists(image_stack, distance_between_images=1.0, debug=True):
 
         image = process_image(image.astype(np.float32), sat_prctile=99)
 
-        # Faster than full FFT because signal is real-valued
+
         flt = np.mean(image, axis=0)
         spectrum = np.abs(np.fft.rfft(flt)) ** 2
 
@@ -74,8 +70,9 @@ def find_focus_dists(image_stack, distance_between_images=1.0, debug=True):
 
     best_focus = np.argmax(uc)
     print("best focus is:", best_focus)
+    best_focus = 25
 
-    if debug:
+    if debug: #change debug to True to display best focused slice in the stack
 
 
         fig, axs = plt.subplots(1, 2, figsize=(10, 4))
@@ -114,7 +111,6 @@ def resample_stack(stack, original_pixel_size, target_pixel_size=1.0):
 
     scale = original_pixel_size / target_pixel_size
 
-    # Don't change number of z frames
     zoom_factors = (1, scale, scale)
 
     stack_resampled = zoom(
@@ -130,15 +126,13 @@ def resample_stack(stack, original_pixel_size, target_pixel_size=1.0):
 def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold, pixel_size, distance_between_images=1):
     stack = load_tiff_stack(tiff_path)
 
-##### RESAMPLING STACK
+# RESAMPLING STACK
     if pixel_size != 1.0: # or in other words if stack.shape[1:] != (1032, 1224):
         stack = resample_stack(
             stack,
             original_pixel_size=pixel_size,
             target_pixel_size=1.0
          )
-
-    print('RESAMPLING DONE - UPSCALING')
 
 
 
@@ -185,23 +179,25 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold, pix
 
         patch_stack = stack[:, x:x + patch_size, y:y + patch_size]
 
-        # Compute focus ONCE for this patch
+        # Compute focus for this patch
         best_focus, focus_dists = find_focus_dists(
             patch_stack,
             distance_between_images=distance_between_images
         )
 
         # Skip patches whose focus is too close to stack boundaries
-        #if best_focus < 30 or best_focus > stack.shape[0] - 30: # maybe change this logic
+        #if best_focus < 30 or best_focus > stack.shape[0] - 30: # logic dependant on stack
           #  print("Skipping patch (focus near edge).")
           #  continue
 
+
         # Generate every distance from the same focus calculation
-        for dist in range(-100, 101): #change to -100 to 100 originally -13 to 13
+        for dist in range(-300, 301): # dependant on stack 
 
             frame_idx = np.argmin(np.abs(focus_dists - dist))
 
             image = patch_stack[frame_idx].astype(np.float32)
+            
 
             # 2x2 binning
             image = image.reshape(
@@ -215,6 +211,7 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold, pix
                 continue
 
             image = process_image(image, sat_prctile=95)
+            print("Patch", patch_idx,"generated files:",sum(1 for f in file_names if f"patch{patch_idx}_" in f))
 
             out_name = f"{file_id}_patch{patch_idx}_d{dist}.tif"
             out_path = os.path.join(subdir, out_name)
@@ -227,64 +224,31 @@ def extract_patches_from_tiff(tiff_path, patch_size, num_patches, threshold, pix
     return file_names, np.array(focal_distances)
 
 
-
-# RUN SCRIPT
-
-# if __name__ == "__main__":
-
-#     tiff_path = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
-
-#     patch_size = 70 # originally 250
-#     threshold = 25
-#     num_patches = 40 # originally 20 but too small
-
-#     file_names, distances = extract_patches_from_tiff(
-#         tiff_path,
-#         patch_size,
-#         num_patches,
-#         threshold
-#     )
-
-#     csv_path = os.path.join(subdir, "file_names_and_distances.csv")
-
-#     with open(csv_path, "w") as f:
-#         f.write("file_name,distance\n")
-#         for name, dist in zip(file_names, distances):
-#             f.write(f"{name},{dist}\n")
-
-#     print(f"\nFinished! Generated {len(file_names)} images.")
-#     print("CSV saved to:", csv_path)
-
-
-
-
-
-
-
 if __name__ == "__main__":
-# tiff_path_s2 = "session2/stack/uclaminiscopev4-stack_1_40fps.tif"
-# tiff_path_s3 = "session3/zStack/uclaminiscopev4-stack_0.tif"
-    # TWO TIFF FILES
-    #tiff_paths = [
-    #    "data/uclaminiscopev4-stack_1_40fps.tif",
-     #   "data/uclaminiscopev4-stack_0.tif"
-    #]
+
+# Path to each TIFF stack, along with Z-spacing, and image micrometres per pixel
 
     tiff_data = [
-    ("data/uclaminiscopev4-stack_1_40fps.tif", 1.0, 1000/608),
-    ("data/uclaminiscopev4-stack_0.tif", 1.0, 1000/608),
-    ("data/fish1.tif", 3.3, 1.0),
-    ("data/fish2.tif", 16, 1.0),
-    ("data/fish3.tif", 16, 1.0),
-    ("data/fish4.tif", 16, 1.0),
+    #("data/uclaminiscopev4-stack_1_40fps.tif", 1.0, 1000/608),
+    #("data/uclaminiscopev4-stack_0.tif", 1.0, 1000/608),
+    #("data/fish1.tif", 3.3, 1.0),
+    #("data/fish2.tif", 16, 1.0),
+    #("data/fish3.tif", 16, 1.0),
+    #("data/fish4.tif", 16, 1.0),
+    #("data/fish5.tif", 16, 1.0),
+    ("data/fish6_zstack1.tif", 16, 1.0),
+    ("data/fish6_zstack2.tif", 16, 1.0),
+    ("data/fish7_zstack1.tif", 16, 1.0),
+    ("data/fish7_zstack2.tif", 16, 1.0),
+    #("data/fish8.tif", 16, 1.0)
     ]
 
     
-    patch_size = 224 # change back to 224
-    threshold = 25
-    num_patches = 128 # originally 128
+    patch_size = 224  
+    threshold = 25    # Double check value for each stack
+    num_patches = 128 
 
-    # Store results from BOTH TIFF files
+    # Store results from TIFF files
     all_file_names = []
     all_distances = []
 
@@ -311,7 +275,7 @@ if __name__ == "__main__":
     # Save one combined CSV
     csv_path = os.path.join(
         subdir,
-        "file_names_and_distances_five_fish.csv"
+        "file_names_and_distances.csv"
     )
 
     with open(csv_path, "w") as f:
