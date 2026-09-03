@@ -20,17 +20,16 @@ import pandas as pd
 import os
 
 
-# -------------------------
+
 # SEED
-# -------------------------
-seed = 0
+
+seed = 42
 torch.manual_seed(seed)
 np.random.seed(seed)
 
 
-# -------------------------
-# DATASET (FIXED FOR TIFF PATCHES)
-# -------------------------
+
+# DATASET 
 class FocusDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None):
         self.img_labels = pd.read_csv(annotations_file)
@@ -47,8 +46,7 @@ class FocusDataset(Dataset):
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
 
-        image = Image.open(img_path).convert("F")  # IMPORTANT: grayscale float
-
+        image = Image.open(img_path).convert("F")  
         label_val = float(self.img_labels.iloc[idx, 1])
 
         # regression target (scaled)
@@ -69,61 +67,44 @@ class FocusDataset(Dataset):
         return image, label
 
 
-# -------------------------
+
 # TRANSFORMS
-# -------------------------
 tr = transforms.Compose([
     transforms.ToImage(),
     transforms.RandomAffine(
     degrees=(-30, 30),  # Rotation range
-    translate=(0.1, 0.1),  # Translation range (as a fraction of total size)
+    translate=(0.1, 0.1),  # Translation range 
     scale=(0.8, 1.2),  # Scale range
     shear=(-10, 10)  # Shear range
     )
-    #transforms.ToDtype(torch.float32, scale=True)
-    #transforms.Resize((224, 224)),
-    # transforms.RandomRotation(90)
 ])
-# Need to add translations, maybe even brightness?
+
+tr_test = transforms.Compose([
+    transforms.ToImage()
+])
 
 
-# -------------------------
+
+
 # LOAD DATA
-# -------------------------
+
 all_data = FocusDataset(
-    #'output/file_names_and_distances_combined.csv',    
-    #    'session2/stack_224_128/file_names_and_distances.csv', #if using just one tiff file
-    #  'session2/stack_224_128',
-    #'output',
-    # 'session3/zStack_224_128/file_names_and_distances.csv',
-    # 'session3/zStack_224_128',
-    #'patches_40/file_names_and_distances_combined.csv',
-    #'patches_40',
-    'five_fish_patches/file_names_and_distances_five_fish.csv',
-    'five_fish_patches',
+    'modelA_patches/file_names_and_distances_modelA.csv',
+    'modelA_patches',
     transform=tr
 )
+
+test_fish = FocusDataset(
+    "test_patches/file_names_and_distances_modelA.csv",
+    "test_patches",
+    transform=tr_test
+)
+
 
 print("Dataset size:", len(all_data))
 
 
-# -------------------------
-# VISUAL CHECK
-# -------------------------
-#indices = np.random.choice(len(all_data), 25, replace=False)
-
-#fig, axs = plt.subplots(5, 5)
-
-#for i, idx in enumerate(indices):
- #   img = all_data[idx][0][0].numpy()
-#    axs[i//5, i%5].imshow(img, cmap='gray')
-
-#plt.show()
-#plt.savefig("dataset_visualization_combined.png", dpi=300)
-
-# -------------------------
 # MODEL
-# -------------------------
 model = MobileNetV2()
 
 model.features[0][0] = Conv2dNormActivation(
@@ -139,63 +120,37 @@ model.classifier = nn.Sequential(
 )
 
 
-# -------------------------
 # TRAIN / TEST SPLIT
-# -------------------------
-# indices_test = [
-#     i for i, s in enumerate(all_data.img_labels.iloc[:, 0])
-#     if 'f3_plane2' in s
-# ]
-# -------------------------
-# SAFE TRAIN/TEST SPLIT
-# -------------------------
-num_samples = len(all_data)
-#num_samples = 20
-
-indices = np.arange(num_samples)
-np.random.shuffle(indices)
-
-split = int(0.8 * num_samples)
-
-indices_train = indices[:split]
-indices_test = indices[split:]
-
-train_data = torch.utils.data.Subset(all_data, indices_train)
-test_data = torch.utils.data.Subset(all_data, indices_test)
-
-print("Train size:", len(train_data))
-print("Test size:", len(test_data))
-
-test_data = torch.utils.data.Subset(all_data, indices_test)
-train_data = torch.utils.data.Subset(
-    all_data,
-    [i for i in range(len(all_data)) if i not in indices_test]
-)
 
 
-train_dataloader = DataLoader(train_data, batch_size=16, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=16, shuffle=True) # initial batch size 16
+train_data = all_data
+train_dataloader = DataLoader(train_data, batch_size=128, shuffle=True)
+test_dataloader = DataLoader(
+    test_fish,
+    batch_size=128,
+    shuffle=False
+    )
 
 
-# -------------------------
-# LOSS / OPTIMIZER
-# -------------------------
+#train_dataloader = DataLoader(train_data, batch_size=16, shuffle=True)
+#test_dataloader = DataLoader(test_data, batch_size=16, shuffle=True) 
+
+
+
+# LOSS / OPTIMISER
 loss_fn_reg = nn.MSELoss()
 loss_fn_class = nn.CrossEntropyLoss()
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print("Device:", device)
 
 model.to(device)
 
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)# add weight decay = 0
-# scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)  
-scheduler = MultiStepLR(optimizer,milestones=[10, 100, 150], gamma=0.5) # add milestones
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3) 
+scheduler = MultiStepLR(optimizer,milestones=[10, 100, 150], gamma=0.5) 
 
 
-# -------------------------
 # TRAIN FUNCTION
-# -------------------------
 def train(dataloader, model):
     model.train()
 
@@ -203,7 +158,7 @@ def train(dataloader, model):
     class_loss_total = 0
 
     for X, y in dataloader:
-        print("Training")
+        #print("Training")
         X = X.to(device)
 
         y_reg = y[0].to(device)
@@ -226,21 +181,12 @@ def train(dataloader, model):
     return reg_loss_total / len(dataloader), class_loss_total / len(dataloader)
 
 
-# -------------------------
 # TEST FUNCTION
-# -------------------------
 def test(dataloader, model):
     model.eval()
     print("Testing")
     reg_loss_total = 0
     class_loss_total = 0
-
-    all_dist_labels = []
-    all_dist_preds = []
-    all_sign_labels = []
-    all_sign_preds = []
-    all_images = []
-    all_filenames = []
 
     all_true_distances = []
     all_pred_distances = []
@@ -286,13 +232,6 @@ def test(dataloader, model):
             )
 
 
-            all_dist_labels.append(y_reg.cpu().numpy())
-            all_dist_preds.append(pred[:, 0].cpu().numpy())
-
-            all_sign_labels.append(y_class.cpu().numpy())
-            all_sign_preds.append(torch.argmax(pred[:, 1:], dim=1).cpu().numpy())
-
-
 
             all_true_distances.extend(
                 true_signed_distance.cpu().numpy()
@@ -305,16 +244,11 @@ def test(dataloader, model):
             all_true_signs.extend(
                 true_sign.cpu().numpy()
             )
-
             all_pred_signs.extend(
                 pred_sign.cpu().numpy()
             )
 
-            # Save images for visualisation
-            all_images.extend(
-                X.cpu().numpy()
-            )
-
+    
     all_true_distances = np.array(
         all_true_distances
     )
@@ -349,9 +283,7 @@ def test(dataloader, model):
     )
 
 
-    # =====================================================
     # CALCULATE CLASSIFICATION ACCURACY
-    # =====================================================
 
     accuracy = accuracy_score(
         all_true_signs,
@@ -360,7 +292,6 @@ def test(dataloader, model):
 
 
 
-# missing batch code if batch == 0; else
     return (
         reg_loss_total / len(dataloader),
         class_loss_total / len(dataloader),
@@ -368,17 +299,12 @@ def test(dataloader, model):
         rmse,
         r2,
     accuracy
-   # all_true_distances,
-   # all_pred_distances,
-   # all_true_signs,
-   # all_pred_signs
     )
 
 
-# -------------------------
+
 # TRAIN LOOP
-# -------------------------
-epochs = 1020 # 100 produces smooth curve, stabilises after 10 epochs but keep it at 200 to be safe
+epochs = 810 
 train_reg_losses = []
 train_class_losses = []
 test_reg_losses = []
@@ -388,79 +314,62 @@ test_rmse = []
 test_r2 = []
 test_accuracy = []
 
-# # load checkpoint if it exists:
-# # find potential checkpoint files:
-# checkpoint_files = [f for f in os.listdir('.') if f.startswith('model_checkpoint_epoch_') and f.endswith('.pth')]
-# last_epoch = 0
-# if checkpoint_files:
-#     # sort by epoch number and take the last one:
-#     checkpoint_files.sort(key=lambda x: int(x.split('_')[-1].split('.')[0]))
-#     checkpoint_path = checkpoint_files[-1]
-#     print(f'Loading checkpoint from {checkpoint_path}')
-#     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
-#     # also update the scheduler to start from the last epoch:
-#     last_epoch = int(checkpoint_path.split('_')[-1].split('.')[0])
-#     scheduler.last_epoch = last_epoch
 
 start_time = time.time()
 for epoch in range(epochs):
     print(f"\nEpoch {epoch+1}")
+    start_time1 = time.time()
+
     train_reg, train_class = train(train_dataloader, model)
-    #test_reg, test_class = test(test_dataloader, model)
-
-    (
-        test_reg,
-        test_class,
-        mae,
-        rmse,
-        r2,
-        accuracy
-       # true_distances,
-       # pred_distances,
-       # true_signs,
-       # pred_signs
-    ) = test(
-        test_dataloader,
-        model
-    )
-
     train_reg_losses.append(train_reg)
     train_class_losses.append(train_class)
-    test_reg_losses.append(test_reg)
-    test_class_losses.append(test_class)
-    test_mae.append(mae)
-    test_rmse.append(rmse)
-    test_r2.append(r2)
-    test_accuracy.append(accuracy)
+    test_reg, test_class = test(test_dataloader, model)
+    # OPTIONAL
+##    if (epoch + 1) % 100 == 0:
+##        test_reg, test_class, mae, rmse, r2, accuracy = test(
+##            test_dataloader,
+##            model
+##        )
+##        test_reg_losses.append(test_reg)
+##        test_class_losses.append(test_class)
+##
+##
+##        test_epochs.append(epoch + 1)
+##
+##        test_mae.append(mae)
+##        test_rmse.append(rmse)
+##        test_r2.append(r2)
+##        test_accuracy.append(accuracy)
+##        print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
     scheduler.step()
-
+    end_time1 = time.time()
     print(f"Train reg: {train_reg:.4f}, class: {train_class:.4f}")
-    print(f"Test reg: {test_reg:.4f}, class: {test_class:.4f}")
+    print("Training time in seconds: ", end_time1 - start_time1)
 
 
-    if epoch % 100 == 0: #change logic to epoch+1
-        torch.save(model.state_dict(), f"model_combined_7datasets_patches_checkpoint_1020epochs_{epoch}.pth")
+
+    if epoch % 100 == 0:
+        torch.save(model.state_dict(), f"modelA_s42_bs128_checkpoint_{epoch}.pth")
 
 end_time = time.time()
 training_time = end_time - start_time
 
 plt.figure(figsize=(10, 6))
 
-plt.plot(test_mae, label="MAE")
-plt.plot(test_rmse, label="RMSE")
+plt.plot(test_epochs, test_mae, label="MAE")
+plt.plot(test_epochs, test_rmse, label="RMSE")
 
 plt.xlabel("Epoch")
-plt.ylabel("Focal distance error")
-plt.title("Regression performance")
+plt.ylabel("Focal distance error (µm)")
 plt.legend()
 plt.grid(True)
 
-plt.savefig("regression_performance_1000epochs.png", dpi=300)
+plt.savefig("regression_performance_1000epochs_modelA_s42_bs128.png", dpi=300)
 #plt.show()
 
 plt.figure(figsize=(10, 6))
 
-plt.plot(test_accuracy, label="Classification accuracy")
+plt.plot(test_epochs, test_accuracy)
 
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
@@ -469,36 +378,53 @@ plt.ylim(0, 1)
 plt.legend()
 plt.grid(True)
 
-plt.savefig("classification_accuracy_1000epochs.png", dpi=300)
+plt.savefig("classification_accuracy_1000epochs_modelA_s42_bs128.png", dpi=300)
 #plt.show()
 
 plt.figure(figsize=(10, 6))
 
-plt.plot(test_r2)
+plt.plot(test_epochs, test_r2)
 
 plt.xlabel("Epoch")
 plt.ylabel("$R^2$")
 plt.title("Regression $R^2$ over training")
 plt.grid(True)
 
-plt.savefig("r2_over_epochs_1000epochs.png", dpi=300)
+plt.savefig("r2_over_epochs_1000epochs_modelA_s42_bs128.png", dpi=300)
 #plt.show()
 
-csv_file = "five_fish_patches/file_names_and_distances_five_fish.csv"
-image_folder = "five_fish_patches"
+plt.figure(figsize=(10, 6))
+
+plt.plot(range(1, epochs + 1), train_reg_losses, label="Train Regression")
+plt.plot(test_epochs, test_reg_losses, label="Test Regression")
+
+plt.plot(range(1, epochs + 1), train_class_losses, label="Train Classification")
+plt.plot(test_epochs, test_class_losses, label="Test Classification")
+
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Training and Test Loss")
+#plt.yscale("log")
+plt.legend()
+plt.grid(True, which = "both", linestyle = "--", alpha = 0.5)
+plt.savefig("loss_plot_modelA_1000epochs_s42_bs128.png", dpi = 300, bbox_inches="tight")
+
+
+print(f"Training time: {training_time:.2f} seconds")
+
+
+
+
+csv_file = "modelA_patches/file_names_and_distances_modelA.csv"
+image_folder = "modelA_patches"
 
 df = pd.read_csv(csv_file)
 
-df["patch_id"] = (
-    df["file_name"]
-    .str.extract(r"patch(\d+)")[0]
-    .astype(int)
-)
 
 
-# -----------------------------------------------------
-# SELECT THREE RANDOM PATCHES
-# -----------------------------------------------------
+
+## SELECT THREE RANDOM PATCHES
+
 
 reference_z = 0
 
@@ -530,7 +456,7 @@ df["patch_id"] = (
 
 
 
-# SELECT THREE RANDOM PATCHES
+### SELECT THREE RANDOM PATCHES
 
 
 reference_z = 0
@@ -557,12 +483,12 @@ print(
 distances = list(
     range(10, -10, -5) # change back to maybe 20 for 11 images originally 100, -101, -20
 )#100,-101,-20
-
-
-# =====================================================
-# MODEL PREDICTION FUNCTION
-# =====================================================
-
+##
+##
+### 
+### MODEL PREDICTION FUNCTION
+###
+##
 def predict_distance(image):
 
     # Convert image to tensor
@@ -729,9 +655,9 @@ for i, d in enumerate(
         )
 
 
-        # =================================================
-        # PREDICT FOCAL DISTANCE
-        # =================================================
+##        # =================================================
+##        # PREDICT FOCAL DISTANCE
+##        # =================================================
 
         predicted_distance = (
             predict_distance(img)
@@ -805,29 +731,13 @@ fig.subplots_adjust(
 
 
 plt.savefig(
-    "three_patch_predictions_7datasets_1000epochs.png",
+    "three_patch_predictions_modelA.png",
     dpi=300,
     bbox_inches="tight"
 )
 
-h = training_time / 3600
-m = training_time / 60
-s = m % 60
-print(f"Training time: {h:.0f} hours, {m:.0f} minutes, {s:.0f} seconds or {training_time:.2f} seconds")
-plt.figure(figsize=(10, 6))
 
-plt.plot(train_reg_losses, label='Train Regression')
-plt.plot(test_reg_losses, label='Test Regression')
-plt.plot(train_class_losses, label='Train Classification')
-plt.plot(test_class_losses, label='Test Classification')
-
-plt.xlabel("Epoch")
-plt.ylabel("Loss (log scale)")
-plt.title("Training and Test Loss")
-plt.yscale("log")
-plt.legend()
-plt.grid(True, which = "both", linestyle = "--", alpha = 0.5)
-plt.savefig("loss_plot_7datasets_1000epochs.png", dpi = 300, bbox_inches="tight") 
 
 #plt.show()
 print("DONE")
+
