@@ -53,7 +53,6 @@ The network learns both regression and direction tasks simultaneously in a multi
 * **Loss Functions:**
   * $\mathcal{L}_{\text{regression}}$: Mean Squared Error (MSE)
   * $\mathcal{L}_{\text{classification}}$: Cross-Entropy Loss
-  * $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{regression}} + \mathcal{L}_{\text{classification}}$
 * **Data Augmentation:** Random affine transformations (rotation, translation, scaling, shearing) to improve spatial invariance.
 
 ---
